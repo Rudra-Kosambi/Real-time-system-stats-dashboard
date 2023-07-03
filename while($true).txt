@@ -1,0 +1,20 @@
+while($true)
+{
+    $ComputerCPU = (Get-WmiObject -Class win32_processor -ErrorAction Stop | Measure-Object -Property LoadPercentage -Average | Select-Object Average).Average
+
+    $ComputerMemory  = Get-WmiObject-Class win32_operatingsystem -ErrorAction Stop
+    $Memory = ((($ComputerMemory.TotalVisisbleMemorySize -$ComputerMemory.FreePhysicalMemory)*100)/$ComputerMemory.TotalVisisbleMemorySize)
+    $RoundMemory = [math]::Round($Memory,2)
+
+    $Date = Get-Date -DisplayHint Date -Format dd/MM/yyy
+    $Time = Get-Date -DisplayHint Time -Format HH:MM:ss
+
+    $endpoint = "https://api.powerbi.com/beta/b87386c8-9083-4a27-9ddf-63a3dfa33850/datasets/ebeef7d6-ea11-4e1a-9cbe-581325144f16/rows?experience=power-bi&key=OD7Js1a2v%2By6KeTUA%2BcKqzHTbD%2FaJ2gqV8uOw%2BfVG6bMcX3JEd%2FKRYNQXR3U0aNvKmdCUprRm%2FSY8sTIfV0aUQ%3D%3D"
+    $payload = @{
+    "Date" =$Date
+    "Time" =$Time
+    "CPU" = $ComputerCPU
+    "Memory" = $RoundMemory
+    }
+    Invoke-RestMethod -Method Post -Uri "$endpoint" -Body (ConvertTo-Json @($payload))
+}
